@@ -1,0 +1,49 @@
+1. requirements.txt
+
+2. install.sh
+
+3. create_structure.sh
+
+4. blockchain/transaction.py
+   - Wallet generation
+   - ECDSA signatures
+   - Transaction model
+   - Verification
+
+5. blockchain/block.py
+   - Block class
+   - Hashing
+   - Mining
+
+6. blockchain/chain.py
+   - Blockchain class
+   - Mempool
+   - UTXO balances
+   - Validation
+   - Consensus
+
+7. blockchain/__init__.py
+
+8. api/node.py
+   - Flask app
+   - REST endpoints
+   - Peer management
+
+9. api/__init__.py
+
+10. tests/test_blockchain.py
+    - Unit tests
+    - Transaction tests
+    - Mining tests
+    - Chain validation tests
+
+11. demo.py
+    - Wallet creation
+    - Transaction creation
+    - Mining demonstration
+
+12. README.md
+    - Architecture
+    - API documentation
+    - Setup instructions
+    - Example usage
