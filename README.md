@@ -1,438 +1,192 @@
-# Blockchain Project
+# ⛓️ Blockchain Project (Python MVP)
 
-A complete educational blockchain implementation built in Python.
+A functional blockchain implementation built from scratch in Python, featuring proof-of-work mining, wallet generation using ECDSA, and a REST API using Flask.
 
-This project demonstrates the fundamental concepts behind blockchain technology including transactions, digital signatures, Proof-of-Work mining, chain validation, wallet management, and REST APIs.
-
----
-
-# Features
-
-## Wallet System
-
-* ECDSA (SECP256k1) key generation
-* Public/Private key management
-* Address generation using SHA-256
-* Digital signatures
-
-## Transactions
-
-* Signed transactions
-* Signature verification
-* Transaction validation
-* Transaction serialization/deserialization
-
-## Blocks
-
-* SHA-256 block hashing
-* Nonce-based Proof-of-Work
-* Block verification
-* JSON serialization
-
-## Blockchain
-
-* Genesis block creation
-* Transaction mempool
-* Mining rewards
-* Account-based balances
-* Chain validation
-* Longest-chain consensus foundation
-* Peer registry
-
-## REST API
-
-* Create wallets
-* Submit transactions
-* Mine blocks
-* View blockchain
-* View balances
-* Register peers
-
-## Testing
-
-* Wallet tests
-* Transaction tests
-* Block tests
-* Mining tests
-* Chain validation tests
+This project demonstrates the core principles behind blockchain systems including transactions, mining, and chain validation.
 
 ---
 
-# Project Structure
+## 🚀 Features
 
-```text
+### Core Blockchain
+- Proof-of-Work (PoW) mining
+- SHA-256 block hashing
+- Chain validation
+- Genesis block creation
+- Mining difficulty system
+
+### Wallet System
+- ECDSA-based key pair generation
+- Wallet address creation
+- In-memory wallet storage
+
+### Transactions
+- Signed transactions using private keys
+- Transaction validation
+- Mempool (pending transactions queue)
+
+### REST API (Flask)
+- Create wallet
+- View wallets
+- Submit transactions
+- Mine blocks
+- View blockchain
+- Check balances
+- Validate chain
+- View network stats
+
+### Testing
+- Unit tests for blockchain logic
+- Transaction validation tests
+- Mining workflow tests
+- Chain integrity tests
+
+---
+
+## Project Structure
+
+```
 blockchain_project/
 │
-├── blockchain/
-│   ├── __init__.py
-│   ├── transaction.py
-│   ├── block.py
-│   └── chain.py
-│
-├── api/
-│   ├── __init__.py
-│   └── node.py
-│
-├── tests/
-│   └── test_blockchain.py
-│
-├── data/
-│   ├── blocks/
-│   ├── wallets/
-│   ├── mempool/
-│   └── backups/
-│
-├── logs/
-│
-├── demo.py
-├── requirements.txt
-├── install.sh
-├── create_structure.sh
-├── .env
+├── blockchain/         # Core blockchain logic
+├── api/                # Flask REST API node
+├── tests/              # Unit tests
+├── demo.py             # End-to-end blockchain demo
+├── requirements.txt    # Dependencies
 └── README.md
 ```
 
 ---
 
-# Installation
+## Installation
 
-## Clone Project
-
+### 1. Clone the repository
 ```bash
-git clone <repository-url>
-cd blockchain_project
+git clone https://github.com/<your-username>/blockchain-project.git
+cd blockchain-project
 ```
 
-## Create Virtual Environment
-
-### Linux / macOS
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### Windows
-
+### 2. Create virtual environment
 ```bash
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate   # Windows
 ```
 
-## Install Dependencies
-
+### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-or
+---
 
+##  Running the Project
+
+### Start the API server
 ```bash
-bash install.sh
+python -m api.node
+```
+
+Server runs at:
+```
+http://127.0.0.1:5000
 ```
 
 ---
 
-# Running the Demo
+## 🔌 API Endpoints
 
-```bash
-python demo.py
+### Health Check
 ```
-
-The demo performs:
-
-1. Wallet creation
-2. Initial funding
-3. Transaction creation
-4. Transaction validation
-5. Mining
-6. Reward distribution
-7. Chain validation
-8. Blockchain export
-
-Expected output:
-
-```text
-Alice Balance: 75
-Bob Balance: 25
-Miner Balance: 50
-```
-
----
-
-# Running the API Node
-
-Start the blockchain node:
-
-```bash
-python api/node.py
-```
-
-Default server:
-
-```text
-http://localhost:5000
-```
-
----
-
-# API Endpoints
-
-## Health Check
-
-```http
 GET /
 ```
 
----
-
-## Create Wallet
-
-```http
+### Create Wallet
+```
 POST /wallet/create
 ```
 
-Response:
-
-```json
-{
-    "success": true,
-    "address": "wallet_address"
-}
+### View Wallets
 ```
-
----
-
-## View Wallets
-
-```http
 GET /wallets
 ```
 
----
-
-## Check Balance
-
-```http
-GET /balance/<address>
+### Send Transaction
 ```
-
----
-
-## Submit Transaction
-
-```http
 POST /transaction
 ```
 
-Request:
-
-```json
-{
-    "sender": "address_1",
-    "receiver": "address_2",
-    "amount": 25
-}
+### Mine Block
 ```
-
----
-
-## View Mempool
-
-```http
-GET /mempool
-```
-
----
-
-## Mine Block
-
-```http
 POST /mine
 ```
 
-Request:
-
-```json
-{
-    "miner_address": "miner_wallet"
-}
+### View Blockchain
 ```
-
----
-
-## View Blockchain
-
-```http
 GET /chain
 ```
 
----
-
-## Validate Blockchain
-
-```http
+### Validate Chain
+```
 GET /chain/validate
 ```
 
----
-
-## Register Peer
-
-```http
-POST /peer/register
+### Network Stats
 ```
-
-Request:
-
-```json
-{
-    "peer": "http://127.0.0.1:5001"
-}
+GET /stats
 ```
 
 ---
 
-## View Peers
-
-```http
-GET /peers
-```
-
----
-
-# Running Tests
-
-Execute all tests:
+## Run Tests
 
 ```bash
-pytest tests/
+pytest -v
 ```
 
-Verbose output:
-
-```bash
-pytest tests/test_blockchain.py -v
+Expected output:
 ```
-
-Coverage:
-
-```bash
-pytest --cov=blockchain tests/
+17 tests passed
 ```
 
 ---
 
-# Blockchain Workflow
+## How it works (simplified)
 
-```text
-Wallet Creation
-       │
-       ▼
-Create Transaction
-       │
-       ▼
-Sign Transaction
-       │
-       ▼
-Validate Transaction
-       │
-       ▼
-Add To Mempool
-       │
-       ▼
-Mine Block
-       │
-       ▼
-Update Balances
-       │
-       ▼
-Validate Chain
-```
+1. A wallet is created using cryptographic key pairs (ECDSA)
+2. Transactions are signed and validated
+3. Valid transactions are added to a mempool
+4. Miners collect transactions into a block
+5. Proof-of-Work ensures computational difficulty
+6. Block is added to the chain after validation
 
 ---
 
-# Configuration
+## Limitations (Current Version)
 
-Settings are stored in:
-
-```text
-.env
-```
-
-Examples:
-
-```env
-BLOCKCHAIN_DIFFICULTY=4
-MINING_REWARD=50
-FLASK_PORT=5000
-```
+- No persistent storage (data resets on restart)
+- Single-node system (no peer-to-peer networking)
+- No smart contracts
+- Basic consensus placeholder only
 
 ---
 
-# Current Limitations
+## Future Improvements
 
-This project is intended for educational purposes.
-
-Not yet implemented:
-
-* Merkle Trees
-* UTXO Model
-* Persistent Storage
-* SQLite Backend
-* Real Peer-to-Peer Networking
-* Automatic Peer Discovery
-* Smart Contracts
-* Distributed Consensus
+- Persistent storage (JSON / SQLite)
+- Multi-node peer-to-peer networking
+- Full consensus algorithm (longest chain rule)
+- Merkle trees for transaction integrity
+- Docker deployment
+- Blockchain explorer UI
 
 ---
 
-# Future Improvements
+## License
 
-Planned enhancements:
-
-* Wallet persistence
-* Blockchain persistence
-* SQLite database support
-* Merkle tree implementation
-* UTXO transaction model
-* Peer synchronization
-* Longest-chain consensus
-* Docker deployment
-* Blockchain explorer
-* Logging framework
-* Authentication layer
+This project is for educational purposes.
 
 ---
 
-# Technologies Used
+##  Author
 
-* Python
-* Flask
-* ECDSA
-* SHA-256
-* PyTest
-* JSON
-* REST APIs
-
----
-
-# Learning Objectives
-
-This project demonstrates:
-
-* Blockchain fundamentals
-* Cryptographic signatures
-* Hashing algorithms
-* Proof-of-Work mining
-* REST API development
-* Distributed systems concepts
-* Software testing practices
-
----
-
-# License
-
-This project is provided for educational and learning purposes.
-
-Feel free to modify, extend, and experiment with the code.
+Built as a learning project to understand blockchain internals from scratch.
