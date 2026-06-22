@@ -1,193 +1,160 @@
-# ⛓️ Blockchain Project (Python) — V2 Persistent System
+⛓️ Blockchain Project (Python MVP → V2 Persistent System)
 
-A fully functional **single-node blockchain system built from scratch in Python**, featuring **Proof-of-Work mining, ECDSA-based wallets, signed transactions, persistent storage, and a REST API using Flask**.
+A fully functional blockchain system built from scratch in Python, evolving from a simple MVP into a persistent, API-driven blockchain architecture.
 
-This project demonstrates real-world blockchain fundamentals including transaction signing, block mining, chain validation, and disk-based persistence.
+This project demonstrates core blockchain principles including cryptographic wallets, signed transactions, proof-of-work mining, and persistent storage.
 
----
+🚀 V2 Major Upgrade (What Changed)
 
-# 🚀 Features
+This version upgrades the system from an in-memory prototype to a fully persistent blockchain system.
 
-## 🔗 Core Blockchain
-- Proof-of-Work (PoW) mining system
-- SHA-256 block hashing
-- Genesis block creation & recovery
-- Chain validation and integrity checks
-- Mining reward system
-- Account-based balance tracking
+Added in V2:
+Persistent blockchain storage (blockchain.json)
+Persistent wallet storage (wallets.json)
+Persistent mempool (mempool.json)
+WalletManager system for secure wallet handling
+Storage layer for save/load/reset operations
+REST API integration with persistence support
+Full system recovery after restart
+Storage status and reset endpoints
+Expanded test suite (30 tests passing)
+🚀 Features
+⛓️ Core Blockchain
+Proof-of-Work (PoW) mining
+SHA-256 block hashing
+Genesis block creation
+Chain validation
+Difficulty-based mining
+Block integrity verification
+👛 Wallet System
+ECDSA key pair generation
+Wallet address creation (SHA-256 of public key)
+WalletManager with persistence
+Import/export private keys
+Wallet lookup and deletion
+Automatic wallet saving
+💸 Transactions
+Digital signatures using ECDSA
+Transaction validation
+Balance verification before sending
+Mempool for pending transactions
+Secure signed transaction creation
+🌐 REST API (Flask Node)
+Wallet creation and management
+Transaction submission
+Mining endpoint
+Blockchain viewer
+Balance checking
+Peer registration system
+Storage status monitoring
+Storage reset functionality
+💾 Persistence Layer
+Blockchain automatically saved to disk
+Wallets persist across restarts
+Mempool persistence
+Automatic recovery on startup
+Full system reset capability
+🧪 Testing
+Blockchain integrity tests
+Transaction validation tests
+Mining workflow tests
+Wallet system tests (8 tests)
+Storage persistence tests
+Full system reload verification tests
+📁 Project Structure
 
----
-
-## 💰 Wallet System
-- ECDSA key pair generation
-- Secure wallet address derivation
-- Wallet import/export support
-- Persistent wallet storage (`wallets.json`)
-- Wallet management via `WalletManager`
-
----
-
-## 💳 Transactions
-- Digitally signed transactions (ECDSA)
-- Transaction validation (signature + balance + rules)
-- Mempool for pending transactions
-- Persistent mempool storage (`mempool.json`)
-
----
-
-## ⛏️ Mining System
-- Proof-of-Work difficulty system
-- Block mining with rewards
-- Automatic balance updates after mining
-- Transaction bundling into blocks
-
----
-
-## 💾 Persistence Layer (V2 Major Feature)
-- Full system persistence across restarts
-- JSON-based storage:
-  - `blockchain.json`
-  - `wallets.json`
-  - `mempool.json`
-- Automatic reload on startup
-- Storage reset and status APIs
-
----
-
-## 🌐 REST API (Flask Node)
-
-### Wallet APIs
-- POST `/wallet/create`
-- GET `/wallets`
-- GET `/wallet/<address>`
-
-### Transaction APIs
-- POST `/transaction`
-- GET `/mempool`
-
-### Blockchain APIs
-- POST `/mine`
-- GET `/chain`
-- GET `/chain/validate`
-- GET `/chain/export`
-
-### Network APIs
-- POST `/peer/register`
-- GET `/peers`
-
-### Storage APIs (V2 Feature)
-- GET `/storage/status`
-- POST `/storage/reset`
-
-### Debug APIs
-- GET `/stats`
-
----
-
-# 🧪 Testing
-
-The system is fully tested with **30 passing tests**:
-
-## Blockchain Tests
-- 17/17 passed
-
-## Wallet System Tests
-- 8/8 passed (`test_wallet_tester.py`)
-
-## Storage & Persistence Tests
-- 5/5 passed (`test_storage.py`)
-
-### ✅ Total
-30/30 tests passing
-
-
----
-
-# 📁 Project Structure
 blockchain_project/
 │
 ├── blockchain/
 │ ├── chain.py
 │ ├── block.py
 │ ├── transaction.py
-│ ├── storage.py
-│ └── wallet_manager.py
+│ ├── storage.py (V2 - persistence layer)
+│ └── wallet_manager.py (V2 - wallet system)
 │
 ├── api/
 │ └── node.py
+│
+├── tests/
+│ ├── test_blockchain.py
+│ ├── test_storage.py
+│ └── test_wallet_tester.py
 │
 ├── data/
 │ ├── blockchain.json
 │ ├── wallets.json
 │ └── mempool.json
 │
-├── tests/
-│ ├── test_blockchain.py
-│ ├── test_wallet_tester.py
-│ └── test_storage.py
-│
-├── demo.py
 ├── requirements.txt
 └── README.md
 
-
----
-
-# ▶️ Running the Project
-
-## Install dependencies
-```bash
+⚙️ Installation
+Clone repository:
+git clone https://github.com/<your-username>/blockchain-project.git
+cd blockchain-project
+Create virtual environment:
+python -m venv venv
+source venv/bin/activate (Mac/Linux)
+venv\Scripts\activate (Windows)
+Install dependencies:
 pip install -r requirements.txt
+▶️ Running the Project
 
-Start API server
-python api/node.py
+Start the API server:
+python -m api.node
 
 Server runs at:
-
 http://127.0.0.1:5000
-🔌 API Overview
-Wallets
-Create wallet
-List wallets
-Get wallet details
-Transactions
-Submit signed transactions
-View mempool
-Mining
-Mine pending transactions
-Receive mining rewards
-Blockchain
-View full chain
-Validate chain integrity
-Export chain JSON
-System
-View stats
-Reset storage
-Check persistence status
-⚙️ How it works
-Wallets are created using ECDSA key pairs
-Transactions are signed using private keys
-Transactions enter mempool after validation
-Miners collect transactions into blocks
-Proof-of-Work secures block creation
-Blocks are appended to the chain
-All state is persisted to disk (V2 feature)
-⚠️ Limitations (Current Version)
-Single-node system (no networking yet)
-No distributed consensus (V3 feature)
-No smart contracts
-No Merkle trees (simplified implementation)
-🚀 Future Improvements (V3 Roadmap)
-Multi-node peer-to-peer network
-Chain synchronization between nodes
-Consensus algorithm (longest valid chain rule)
-Node discovery system
-Distributed mining simulation
-Blockchain explorer UI
-📜 License
 
-Educational project for learning blockchain internals.
+🔌 API Endpoints
+Core
+GET / → Health check
+GET /chain → View blockchain
+GET /chain/validate → Validate chain
+Wallets
+POST /wallet/create → Create wallet
+GET /wallets → List wallets
+GET /wallet/<address> → Get wallet details
+Transactions
+POST /transaction → Send transaction
+GET /mempool → View pending transactions
+Mining
+POST /mine → Mine pending transactions
+Network
+POST /peer/register → Register peer
+GET /peers → View peers
+Storage (NEW in V2)
+GET /storage/status → Check storage state
+POST /storage/reset → Reset all data
+🧠 How it works (Simplified)
+Wallet is created using ECDSA key pair
+Transactions are signed with private key
+Valid transactions enter the mempool
+Miner collects transactions into a block
+Proof-of-Work secures the block
+Block is added to chain
+Data is persisted to disk automatically
+⚠️ Limitations (Current Version)
+Single-node system (no real networking yet)
+No smart contracts
+Basic consensus placeholder
+No Merkle tree optimization
+🚀 Future Improvements (V3+)
+Peer-to-peer networking
+Distributed consensus (longest chain rule)
+Node discovery system
+Chain synchronization across nodes
+Smart contract layer
+Docker deployment
+Blockchain explorer UI
+📌 Status
+
+✔ 30/30 tests passing
+✔ Fully persistent blockchain system
+✔ Wallet + storage architecture complete
+✔ REST API integrated
+✔ V2 complete and stable
 
 👨‍💻 Author
 
-Built as a deep systems-learning project to understand blockchain architecture, cryptography, distributed systems, and persistence engineering.
+Built as a learning project to deeply understand blockchain systems from scratch, including cryptography, consensus basics, and system design principles.
