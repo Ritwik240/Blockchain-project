@@ -1,57 +1,33 @@
 """
 api/node.py
 
-Blockchain Node REST API
-
-Features
---------
-- Health Check
-- Wallet Creation
-- Submit Transactions
-- View Mempool
-- Mine Blocks
-- View Blockchain
-- Check Balances
-- Register Peers
-- View Peers
-- Replace Chain (Consensus)
-- Export Blockchain
-
-Run:
-    python api/node.py
+Blockchain Node REST API (V2 Final)
 """
 
 from __future__ import annotations
 
 from flask import request, jsonify
-
 import os
 import sys
 
+# ==========================================================
+# PROJECT ROOT SETUP
+# ==========================================================
+
 PROJECT_ROOT = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        ".."
-    )
+    os.path.join(os.path.dirname(__file__), "..")
 )
 
 sys.path.insert(0, PROJECT_ROOT)
 
 from api import create_app
 
-from blockchain.chain import (
-    create_blockchain
-)
+from blockchain.chain import create_blockchain
+from blockchain.block import serialize_block
+from blockchain.transaction import create_signed_transaction
 
-from blockchain.transaction import (
-    create_wallet,
-    get_wallet_address,
-    create_signed_transaction,
-)
-
-from blockchain.block import (
-    serialize_block
-)
+from blockchain.wallet_manager import WalletManager
+from blockchain.storage import storage_status, reset_storage
 
 
 # ==========================================================
@@ -65,26 +41,20 @@ blockchain = create_blockchain(
     mining_reward=50.0
 )
 
-wallet_store = {}
+wallet_manager = WalletManager()
 
 
 # ==========================================================
 # HEALTH CHECK
 # ==========================================================
 
-@app.route(
-    "/",
-    methods=["GET"]
-)
+@app.route("/", methods=["GET"])
 def health_check():
-
     return jsonify({
         "status": "online",
         "service": "blockchain-node",
         "chain_length": blockchain.get_chain_length(),
-        "pending_transactions": len(
-            blockchain.get_pending_transactions()
-        )
+        "pending_transactions": len(blockchain.get_pending_transactions())
     })
 
 
@@ -92,81 +62,74 @@ def health_check():
 # WALLET ENDPOINTS
 # ==========================================================
 
-@app.route(
-    "/wallet/create",
-    methods=["POST"]
-)
+@app.route("/wallet/create", methods=["POST"])
 def create_wallet_endpoint():
 
-    wallet = create_wallet()
+    address = wallet_manager.create_new_wallet()
 
-    address = get_wallet_address(
-        wallet
-    )
-
-    wallet_store[address] = wallet
+    wallet = wallet_manager.get_wallet(address)
 
     return jsonify({
         "success": True,
-        "address": address
+        "address": address,
+        "public_key": wallet["public_key"]
     })
 
 
-@app.route(
-    "/wallets",
-    methods=["GET"]
-)
+@app.route("/wallets", methods=["GET"])
 def get_wallets():
 
     return jsonify({
-        "wallets": list(
-            wallet_store.keys()
-        )
+        "wallets": list(wallet_manager.list_wallets().keys())
+    })
+
+
+@app.route("/wallet/<address>", methods=["GET"])
+def get_wallet(address):
+
+    wallet = wallet_manager.get_wallet(address)
+
+    if wallet is None:
+        return jsonify({
+            "success": False,
+            "message": "Wallet not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "wallet": wallet
     })
 
 
 # ==========================================================
-# BALANCE ENDPOINTS
+# BALANCE
 # ==========================================================
 
-@app.route(
-    "/balance/<address>",
-    methods=["GET"]
-)
+@app.route("/balance/<address>", methods=["GET"])
 def get_balance(address):
-
-    balance = blockchain.get_balance(
-        address
-    )
 
     return jsonify({
         "address": address,
-        "balance": balance
+        "balance": blockchain.get_balance(address)
     })
 
 
 # ==========================================================
-# TRANSACTION ENDPOINTS
+# TRANSACTION
 # ==========================================================
 
-@app.route(
-    "/transaction",
-    methods=["POST"]
-)
+@app.route("/transaction", methods=["POST"])
 def create_transaction_endpoint():
 
     data = request.get_json()
 
-    required_fields = [
-        "sender",
-        "receiver",
-        "amount"
-    ]
+    required = ["sender", "receiver", "amount"]
 
-    for field in required_fields:
+    if not data:
+        return jsonify({"success": False, "message": "Invalid request"}), 400
 
+    for field in required:
         if field not in data:
-
             return jsonify({
                 "success": False,
                 "message": f"Missing field: {field}"
@@ -174,65 +137,52 @@ def create_transaction_endpoint():
 
     sender = data["sender"]
     receiver = data["receiver"]
-    amount = float(
-        data["amount"]
-    )
+    amount = float(data["amount"])
 
-    if sender not in wallet_store:
+    sender_wallet = wallet_manager.restore_wallet(sender)
 
+    if sender_wallet is None:
         return jsonify({
             "success": False,
-            "message": "Sender wallet not found."
+            "message": "Sender wallet not found"
         }), 404
 
-    transaction = (
-        create_signed_transaction(
-            sender_wallet=wallet_store[
-                sender
-            ],
-            receiver_address=receiver,
-            amount=amount
-        )
+    tx = create_signed_transaction(
+        sender_wallet=sender_wallet,
+        receiver_address=receiver,
+        amount=amount
     )
 
-    success = blockchain.add_transaction(
-        transaction
-    )
+    success = blockchain.add_transaction(tx)
 
     if not success:
-
         return jsonify({
             "success": False,
-            "message":
-            "Transaction validation failed."
+            "message": "Transaction rejected"
         }), 400
 
     return jsonify({
         "success": True,
-        "message":
-        "Transaction added to mempool."
+        "message": "Transaction added to mempool"
     })
 
 
-@app.route(
-    "/mempool",
-    methods=["GET"]
-)
+# ==========================================================
+# MEMPOOL
+# ==========================================================
+
+@app.route("/mempool", methods=["GET"])
 def get_mempool():
 
     transactions = []
 
     for tx in blockchain.get_pending_transactions():
-
         transactions.append(
-            tx.serialize()
-            if hasattr(tx, "serialize")
-            else tx.__dict__
+            serialize_block(tx) if hasattr(tx, "serialize") else tx.__dict__
         )
 
     return jsonify({
-        "pending_transactions":
-        transactions
+        "pending_transactions": transactions
     })
 
 
@@ -240,90 +190,55 @@ def get_mempool():
 # MINING
 # ==========================================================
 
-@app.route(
-    "/mine",
-    methods=["POST"]
-)
-def mine_block_endpoint():
+@app.route("/mine", methods=["POST"])
+def mine_block():
 
     data = request.get_json()
 
-    if not data:
-
+    if not data or "miner_address" not in data:
         return jsonify({
             "success": False,
-            "message":
-            "Miner address required."
+            "message": "miner_address required"
         }), 400
 
-    miner_address = data.get(
-        "miner_address"
-    )
-
-    if not miner_address:
-
-        return jsonify({
-            "success": False,
-            "message":
-            "miner_address missing."
-        }), 400
-
-    block = (
-        blockchain.mine_pending_transactions(
-            miner_address
-        )
+    block = blockchain.mine_pending_transactions(
+        data["miner_address"]
     )
 
     if block is None:
-
         return jsonify({
             "success": False,
-            "message":
-            "No transactions available."
+            "message": "No transactions to mine"
         }), 400
 
     return jsonify({
         "success": True,
-        "block":
-        serialize_block(block)
+        "block": serialize_block(block)
     })
 
 
 # ==========================================================
-# BLOCKCHAIN
+# CHAIN
 # ==========================================================
 
-@app.route(
-    "/chain",
-    methods=["GET"]
-)
+@app.route("/chain", methods=["GET"])
 def get_chain():
 
     return jsonify({
-        "length":
-        blockchain.get_chain_length(),
-        "chain":
-        blockchain.export_chain()
+        "length": blockchain.get_chain_length(),
+        "chain": blockchain.export_chain()
     })
 
 
-@app.route(
-    "/chain/validate",
-    methods=["GET"]
-)
+@app.route("/chain/validate", methods=["GET"])
 def validate_chain():
 
-    valid = blockchain.is_chain_valid()
-
     return jsonify({
-        "valid": valid
+        "valid": blockchain.is_chain_valid()
     })
 
 
-@app.route(
-    "/chain/export",
-    methods=["GET"]
-)
+@app.route("/chain/export", methods=["GET"])
 def export_chain():
 
     return blockchain.to_json()
@@ -333,109 +248,74 @@ def export_chain():
 # PEERS
 # ==========================================================
 
-@app.route(
-    "/peer/register",
-    methods=["POST"]
-)
+@app.route("/peer/register", methods=["POST"])
 def register_peer():
 
     data = request.get_json()
 
-    if not data:
+    if not data or "peer" not in data:
+        return jsonify({"success": False}), 400
 
-        return jsonify({
-            "success": False
-        }), 400
-
-    peer = data.get(
-        "peer"
-    )
-
-    if not peer:
-
-        return jsonify({
-            "success": False
-        }), 400
-
-    blockchain.add_peer(peer)
+    blockchain.add_peer(data["peer"])
 
     return jsonify({
         "success": True,
-        "peer": peer
+        "peer": data["peer"]
     })
 
 
-@app.route(
-    "/peers",
-    methods=["GET"]
-)
+@app.route("/peers", methods=["GET"])
 def get_peers():
 
     return jsonify({
-        "peers":
-        blockchain.get_peers()
+        "peers": blockchain.get_peers()
     })
 
 
 # ==========================================================
-# CONSENSUS
+# STORAGE (NEW V2 FEATURE)
 # ==========================================================
 
-@app.route(
-    "/consensus/replace",
-    methods=["POST"]
-)
-def replace_chain():
+@app.route("/storage/status", methods=["GET"])
+def storage_status_endpoint():
 
-    data = request.get_json()
+    return jsonify(storage_status())
 
-    if not data:
 
-        return jsonify({
-            "success": False
-        }), 400
+@app.route("/storage/reset", methods=["POST"])
+def reset_storage_endpoint():
+
+    global blockchain
+    global wallet_manager
+
+    reset_storage()
+
+    blockchain = create_blockchain(
+        difficulty=4,
+        mining_reward=50.0
+    )
+
+    wallet_manager = WalletManager()
 
     return jsonify({
-        "success": True,
-        "message":
-        "Consensus endpoint ready."
+        "success": True
     })
 
 
 # ==========================================================
-# DEBUG ENDPOINTS
+# STATS
 # ==========================================================
 
-@app.route(
-    "/stats",
-    methods=["GET"]
-)
-def network_stats():
+@app.route("/stats", methods=["GET"])
+def stats():
 
     return jsonify({
-        "difficulty":
-        blockchain.difficulty,
-
-        "mining_reward":
-        blockchain.mining_reward,
-
-        "chain_length":
-        blockchain.get_chain_length(),
-
-        "mempool_size":
-        len(
-            blockchain.get_pending_transactions()
-        ),
-
-        "peer_count":
-        len(
-            blockchain.get_peers()
-        ),
-
-        "wallet_count":
-        len(
-            wallet_store
-        )
+        "difficulty": blockchain.difficulty,
+        "mining_reward": blockchain.mining_reward,
+        "chain_length": blockchain.get_chain_length(),
+        "mempool_size": len(blockchain.get_pending_transactions()),
+        "peer_count": len(blockchain.get_peers()),
+        "wallet_count": wallet_manager.wallet_count()
     })
 
 
@@ -444,7 +324,6 @@ def network_stats():
 # ==========================================================
 
 if __name__ == "__main__":
-
     app.run(
         host="0.0.0.0",
         port=5000,

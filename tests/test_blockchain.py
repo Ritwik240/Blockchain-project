@@ -24,6 +24,7 @@ or
 """
 import os
 import sys
+import pytest
 
 PROJECT_ROOT = os.path.abspath(
     os.path.join(
@@ -50,6 +51,19 @@ from blockchain.block import (
 from blockchain.chain import (
     create_blockchain,
 )
+
+from blockchain.storage import (
+    reset_storage
+)
+
+@pytest.fixture(autouse=True)
+def clean_storage():
+
+    reset_storage()
+
+    yield
+
+    reset_storage()
 
 
 # ==========================================================

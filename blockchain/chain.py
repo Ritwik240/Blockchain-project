@@ -24,6 +24,13 @@ from __future__ import annotations
 import json
 from typing import Dict, List, Set, Optional
 
+from blockchain.storage import (
+    save_blockchain,
+    load_blockchain,
+    save_mempool,
+    load_mempool,
+)
+
 from blockchain.block import (
     Block,
     create_block,
@@ -37,8 +44,8 @@ from blockchain.transaction import (
     Transaction,
     validate_transaction,
     serialize_transaction,
+    deserialize_transaction,
 )
-
 
 # ==========================================================
 # BLOCKCHAIN
@@ -63,27 +70,49 @@ class Blockchain:
         # Simple account-based balance model
         self.balances: Dict[str, float] = {}
 
-        self.create_genesis_block()
+        self.load_or_create_blockchain()
 
-    # ======================================================
-    # GENESIS BLOCK
-    # ======================================================
+   # ======================================================
+   # GENESIS BLOCK
+   # ======================================================
 
     def create_genesis_block(self) -> None:
-
         genesis_block = create_block(
             index=0,
             transactions=[],
             previous_hash="0" * 64
-        )
-
+            )
+        
         genesis_block.hash = (
             "0" * 64
-        )
-
+            )
+        
         self.chain.append(
             genesis_block
-        )
+            )
+
+
+    def load_or_create_blockchain(self) -> None:
+        
+        stored_chain = load_blockchain()
+        if stored_chain:
+            self.chain = [
+                deserialize_block(block)
+                for block in stored_chain
+                ]
+            
+        else:
+            self.create_genesis_block()
+            save_blockchain(self.export_chain())
+            
+        stored_mempool = load_mempool()
+        if stored_mempool:
+            self.mempool = [
+                deserialize_transaction(tx)
+                for tx in stored_mempool
+                ]
+        else:
+            self.mempool = []
 
     # ======================================================
     # BLOCK ACCESS
@@ -191,8 +220,12 @@ class Blockchain:
         if sender_balance < transaction.amount:
             return False
 
-        self.mempool.append(
-            transaction
+        self.mempool.append(transaction)
+        save_mempool(
+            [
+                serialize_transaction(tx)
+                for tx in self.mempool
+            ]
         )
 
         return True
@@ -208,6 +241,7 @@ class Blockchain:
     ) -> None:
 
         self.mempool.clear()
+        save_mempool([])
 
     # ======================================================
     # MINING
@@ -252,13 +286,18 @@ class Blockchain:
             new_block
         )
 
+        save_blockchain(
+            self.export_chain()
+        )
+
         self.update_balances(
             block_transactions
         )
 
         self.clear_mempool()
-
         return new_block
+
+        
 
     # ======================================================
     # CHAIN VALIDATION
@@ -309,6 +348,10 @@ class Blockchain:
             return False
 
         self.chain = incoming_chain
+
+        save_blockchain(
+            self.export_chain()
+            )
 
         return True
 
@@ -418,14 +461,13 @@ class Blockchain:
 # ==========================================================
 
 def create_blockchain(
-    difficulty: int = 4,
-    mining_reward: float = 50.0
-) -> Blockchain:
-
+        difficulty: int = 4,
+        mining_reward: float = 50.0
+        ) -> Blockchain:
     return Blockchain(
         difficulty=difficulty,
         mining_reward=mining_reward
-    )
+        )
 
 
 # ==========================================================

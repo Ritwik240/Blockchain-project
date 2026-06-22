@@ -1,192 +1,193 @@
-# ⛓️ Blockchain Project (Python MVP)
+# ⛓️ Blockchain Project (Python) — V2 Persistent System
 
-A functional blockchain implementation built from scratch in Python, featuring proof-of-work mining, wallet generation using ECDSA, and a REST API using Flask.
+A fully functional **single-node blockchain system built from scratch in Python**, featuring **Proof-of-Work mining, ECDSA-based wallets, signed transactions, persistent storage, and a REST API using Flask**.
 
-This project demonstrates the core principles behind blockchain systems including transactions, mining, and chain validation.
+This project demonstrates real-world blockchain fundamentals including transaction signing, block mining, chain validation, and disk-based persistence.
 
 ---
 
-## 🚀 Features
+# 🚀 Features
 
-### Core Blockchain
-- Proof-of-Work (PoW) mining
+## 🔗 Core Blockchain
+- Proof-of-Work (PoW) mining system
 - SHA-256 block hashing
-- Chain validation
-- Genesis block creation
-- Mining difficulty system
-
-### Wallet System
-- ECDSA-based key pair generation
-- Wallet address creation
-- In-memory wallet storage
-
-### Transactions
-- Signed transactions using private keys
-- Transaction validation
-- Mempool (pending transactions queue)
-
-### REST API (Flask)
-- Create wallet
-- View wallets
-- Submit transactions
-- Mine blocks
-- View blockchain
-- Check balances
-- Validate chain
-- View network stats
-
-### Testing
-- Unit tests for blockchain logic
-- Transaction validation tests
-- Mining workflow tests
-- Chain integrity tests
+- Genesis block creation & recovery
+- Chain validation and integrity checks
+- Mining reward system
+- Account-based balance tracking
 
 ---
 
-## Project Structure
+## 💰 Wallet System
+- ECDSA key pair generation
+- Secure wallet address derivation
+- Wallet import/export support
+- Persistent wallet storage (`wallets.json`)
+- Wallet management via `WalletManager`
 
-```
+---
+
+## 💳 Transactions
+- Digitally signed transactions (ECDSA)
+- Transaction validation (signature + balance + rules)
+- Mempool for pending transactions
+- Persistent mempool storage (`mempool.json`)
+
+---
+
+## ⛏️ Mining System
+- Proof-of-Work difficulty system
+- Block mining with rewards
+- Automatic balance updates after mining
+- Transaction bundling into blocks
+
+---
+
+## 💾 Persistence Layer (V2 Major Feature)
+- Full system persistence across restarts
+- JSON-based storage:
+  - `blockchain.json`
+  - `wallets.json`
+  - `mempool.json`
+- Automatic reload on startup
+- Storage reset and status APIs
+
+---
+
+## 🌐 REST API (Flask Node)
+
+### Wallet APIs
+- POST `/wallet/create`
+- GET `/wallets`
+- GET `/wallet/<address>`
+
+### Transaction APIs
+- POST `/transaction`
+- GET `/mempool`
+
+### Blockchain APIs
+- POST `/mine`
+- GET `/chain`
+- GET `/chain/validate`
+- GET `/chain/export`
+
+### Network APIs
+- POST `/peer/register`
+- GET `/peers`
+
+### Storage APIs (V2 Feature)
+- GET `/storage/status`
+- POST `/storage/reset`
+
+### Debug APIs
+- GET `/stats`
+
+---
+
+# 🧪 Testing
+
+The system is fully tested with **30 passing tests**:
+
+## Blockchain Tests
+- 17/17 passed
+
+## Wallet System Tests
+- 8/8 passed (`test_wallet_tester.py`)
+
+## Storage & Persistence Tests
+- 5/5 passed (`test_storage.py`)
+
+### ✅ Total
+30/30 tests passing
+
+
+---
+
+# 📁 Project Structure
 blockchain_project/
 │
-├── blockchain/         # Core blockchain logic
-├── api/                # Flask REST API node
-├── tests/              # Unit tests
-├── demo.py             # End-to-end blockchain demo
-├── requirements.txt    # Dependencies
+├── blockchain/
+│ ├── chain.py
+│ ├── block.py
+│ ├── transaction.py
+│ ├── storage.py
+│ └── wallet_manager.py
+│
+├── api/
+│ └── node.py
+│
+├── data/
+│ ├── blockchain.json
+│ ├── wallets.json
+│ └── mempool.json
+│
+├── tests/
+│ ├── test_blockchain.py
+│ ├── test_wallet_tester.py
+│ └── test_storage.py
+│
+├── demo.py
+├── requirements.txt
 └── README.md
-```
+
 
 ---
 
-## Installation
+# ▶️ Running the Project
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/<your-username>/blockchain-project.git
-cd blockchain-project
-```
-
-### 2. Create virtual environment
-```bash
-python -m venv venv
-venv\Scripts\activate   # Windows
-```
-
-### 3. Install dependencies
+## Install dependencies
 ```bash
 pip install -r requirements.txt
-```
 
----
-
-##  Running the Project
-
-### Start the API server
-```bash
-python -m api.node
-```
+Start API server
+python api/node.py
 
 Server runs at:
-```
+
 http://127.0.0.1:5000
-```
+🔌 API Overview
+Wallets
+Create wallet
+List wallets
+Get wallet details
+Transactions
+Submit signed transactions
+View mempool
+Mining
+Mine pending transactions
+Receive mining rewards
+Blockchain
+View full chain
+Validate chain integrity
+Export chain JSON
+System
+View stats
+Reset storage
+Check persistence status
+⚙️ How it works
+Wallets are created using ECDSA key pairs
+Transactions are signed using private keys
+Transactions enter mempool after validation
+Miners collect transactions into blocks
+Proof-of-Work secures block creation
+Blocks are appended to the chain
+All state is persisted to disk (V2 feature)
+⚠️ Limitations (Current Version)
+Single-node system (no networking yet)
+No distributed consensus (V3 feature)
+No smart contracts
+No Merkle trees (simplified implementation)
+🚀 Future Improvements (V3 Roadmap)
+Multi-node peer-to-peer network
+Chain synchronization between nodes
+Consensus algorithm (longest valid chain rule)
+Node discovery system
+Distributed mining simulation
+Blockchain explorer UI
+📜 License
 
----
+Educational project for learning blockchain internals.
 
-## 🔌 API Endpoints
+👨‍💻 Author
 
-### Health Check
-```
-GET /
-```
-
-### Create Wallet
-```
-POST /wallet/create
-```
-
-### View Wallets
-```
-GET /wallets
-```
-
-### Send Transaction
-```
-POST /transaction
-```
-
-### Mine Block
-```
-POST /mine
-```
-
-### View Blockchain
-```
-GET /chain
-```
-
-### Validate Chain
-```
-GET /chain/validate
-```
-
-### Network Stats
-```
-GET /stats
-```
-
----
-
-## Run Tests
-
-```bash
-pytest -v
-```
-
-Expected output:
-```
-17 tests passed
-```
-
----
-
-## How it works (simplified)
-
-1. A wallet is created using cryptographic key pairs (ECDSA)
-2. Transactions are signed and validated
-3. Valid transactions are added to a mempool
-4. Miners collect transactions into a block
-5. Proof-of-Work ensures computational difficulty
-6. Block is added to the chain after validation
-
----
-
-## Limitations (Current Version)
-
-- No persistent storage (data resets on restart)
-- Single-node system (no peer-to-peer networking)
-- No smart contracts
-- Basic consensus placeholder only
-
----
-
-## Future Improvements
-
-- Persistent storage (JSON / SQLite)
-- Multi-node peer-to-peer networking
-- Full consensus algorithm (longest chain rule)
-- Merkle trees for transaction integrity
-- Docker deployment
-- Blockchain explorer UI
-
----
-
-## License
-
-This project is for educational purposes.
-
----
-
-##  Author
-
-Built as a learning project to understand blockchain internals from scratch.
+Built as a deep systems-learning project to understand blockchain architecture, cryptography, distributed systems, and persistence engineering.
